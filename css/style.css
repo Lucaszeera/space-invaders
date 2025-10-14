@@ -1,0 +1,40 @@
+*{
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+}
+
+.main{
+    background-color: #222;
+    min-height: 400px;
+    height: 100vh;
+    min-width: 500px;
+    max-width: 1000px;
+    border: 1px solid black;
+    margin: 0 auto;
+    position: relative;
+}
+
+.nave{
+    width: 60px;
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
+
+.bala{
+    background-color: yellow;
+    border-radius: 5px;
+    box-shadow: 0px 0px 0px 1px green;
+    position: absolute;
+    width: 4px;
+    height: 16px;
+    transform: translateX(-50%);
+}
+
+.invader{
+    width: 50px;
+    top: 30px;
+    left: 30px;
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
