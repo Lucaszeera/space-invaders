@@ -1,6 +1,7 @@
 const nave = document.querySelector('.nave');
 const campoDeBatalha = document.querySelector('.main');
 const coracao = document.querySelector('.coracao')
+const telaGameOver = document.querySelector('gameover')
 
 // da pra esquematizar com encapsulamento
 const minXInvader = 5;
@@ -18,6 +19,8 @@ let estaVivo = true;
 let naveX = 50;
 let naveY = 80;
 
+let gameOver = false;
+const speed = 50;
 const moveRandomRate = 0.02;
 const vidaInicial = 3;
 const step = 0.4;
@@ -41,6 +44,7 @@ document.addEventListener('keyup', (e) => {
 });
 
 function move() {
+    if (gameOver) return;
     if (keys['a']) naveX -= step;
     if (keys['d']) naveX += step;
     if (keys['w']) naveY -= step;
@@ -57,6 +61,7 @@ function move() {
 move();
 
 function atirar(shooter) {
+    if (gameOver) return;
     const isPlayerShooter = shooter === nave;
     if (isPlayerShooter && !podeAtirar) return;
 
@@ -78,7 +83,7 @@ function atirar(shooter) {
 };
 
 function moverTiro(bala, isPlayerShooter) {
-
+    if (gameOver) return;
     let balaY = parseFloat(bala.style.top);
     let jogadorAtirando = isPlayerShooter
 
@@ -86,14 +91,15 @@ function moverTiro(bala, isPlayerShooter) {
         if (jogadorAtirando) {
             balaY -= 1;
 
-            listaInvaders.forEach((invader, i) => {
+            for (let i = listaInvaders.length - 1; i >= 0; i--) {
+                const invaderData = listaInvaders[i]
+                const invader = invaderData.objeto
                 if (colidiu(invader, bala)) {
-                    listaInvaders.splice(i, 1)
-                    invader.remove();
+                    destruirInvader(invaderData, i)
                     bala.remove();
                     clearInterval(intervalo);
                 }
-            })
+            }
         }
         else {
 
@@ -104,7 +110,12 @@ function moverTiro(bala, isPlayerShooter) {
                 listaCoracoes.pop().remove()
                 clearInterval(intervalo)
                 if (listaCoracoes.length <= 0) {
-                    //Configurar o game over   <<<<<<<<<<<<<<<<<<<<<
+                    for (let i = listaInvaders.length - 1; i >= 0; i--) {
+                        gameOver = true;
+                        bala.remove()
+                        fecharJogo()
+                    }
+                    clearInterval(intervalo)
                     return
                 }
             }
@@ -119,8 +130,8 @@ function moverTiro(bala, isPlayerShooter) {
     }, 10);
 }
 
-
 function gerarInvader() {
+    if (gameOver) return;
     if (!podeCriarInvader) return;
     podeCriarInvader = false;
 
@@ -132,14 +143,11 @@ function gerarInvader() {
     invader.src = '../images/invader 1.png';
     invader.style.left = `${posX}%`;
     invader.style.top = `${posY}%`;
-    listaInvaders.push(invader)
+    const invaderData = { objeto: invader, intervalos: [] };
+    listaInvaders.push(invaderData)
 
     campoDeBatalha.appendChild(invader);
-    moverInvader(invader);
-
-    const intervalo = setInterval(() => {
-        atirar(invader);
-    }, cooldownTiroInvader);
+    moverInvader(invaderData);
 
     setTimeout(() => {
         podeCriarInvader = true;
@@ -148,12 +156,14 @@ function gerarInvader() {
 }
 gerarInvader();
 
-function moverInvader(invader) {
+function moverInvader(invaderData) {
+    if (gameOver) return;
+    const invader = invaderData.objeto;
     let direcao = mudarDirecaoInvader();
     let posX = parseFloat(invader.style.left);
     let posY = parseFloat(invader.style.top);
 
-    const intervalo = setInterval(() => {
+    const intervaloMovimento = setInterval(() => {
         if (Math.random() <= moveRandomRate) direcao = mudarDirecaoInvader();
 
         //da pra esquematizar com o encapsulamento 
@@ -183,19 +193,35 @@ function moverInvader(invader) {
         invader.style.left = `${posX}%`;
         invader.style.top = `${posY}%`;
 
-    }, 50);
-    atirar(invader);
+    }, speed);
+
+    const intervaloTiro = setInterval(() => {
+        atirar(invader);
+    }, cooldownTiroInvader);
+    invaderData.intervalos.push(intervaloMovimento, intervaloTiro);
+    console.log(invaderData)
 }
 
-
 function mudarDirecaoInvader() {
+    if (gameOver) return;
     const direcao = ["up", "down", "left", "right"]
     let escolha = Math.floor(Math.random() * 4);
     return direcao[escolha];
+}
 
+function destruirInvader(invaderData, index) {
+
+    invader = invaderData.objeto
+    invader.remove();
+    listaInvaders.splice(index, 1);
+
+    if (invaderData.intervalos) {
+        invaderData.intervalos.forEach(intervalo => clearInterval(intervalo));
+    }
 }
 
 function colidiu(alvo, bala) {
+    if (gameOver) return;
     let alvoX = parseFloat(alvo.style.left)
     let alvoY = parseFloat(alvo.style.top)
     let balaX = parseFloat(bala.style.left)
@@ -221,3 +247,25 @@ function renderLife() {
     }
 }
 renderLife()
+function reiniciarJogo() {
+    campoDeBatalha.removeChild(telaGameOver)
+    gameOver = false
+}
+
+function fecharJogo() {
+    for (let i = listaInvaders.length - 1; i >= 0; i--) {
+        let invaderData = listaInvaders[i]
+        destruirInvader(invaderData, i)
+    }
+    nave.remove()
+
+    const template = document.getElementById('telaGameOver');
+    const telaGameOver = template.content.cloneNode(true);
+
+    campoDeBatalha.appendChild(telaGameOver)
+
+    const botaoReiniciar = campoDeBatalha.querySelector('.botaoReiniciar');
+    botaoReiniciar.addEventListener('click', '');
+
+
+}
