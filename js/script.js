@@ -1,27 +1,39 @@
 const nave = document.querySelector('.nave');
 const campoDeBatalha = document.querySelector('.main');
+const coracao = document.querySelector('.coracao')
 
-const minX = 5;
-const minY = 5;
-const maxX = 95;
-const maxY = 35;
+// da pra esquematizar com encapsulamento
+const minXInvader = 5;
+const minYInvader = 5;
+const maxXInvader = 95;
+const maxYInvader = 35;
+
+const minXPlayer = 5;
+const minYPlayer = 40;
+const maxXPlayer = 95;
+const maxYPlayer = 95;
+
+let estaVivo = true;
 
 let naveX = 50;
 let naveY = 80;
-let tiroX = 0;
-let tiroY = 0;
 
+const moveRandomRate = 0.02;
+const vidaInicial = 3;
 const step = 0.4;
 const keys = {}
-const listaInvaders = []
-const cooldownTiro = 400;
-const cooldownInvader = 500;
+const cooldownTiroPlayer = 400;
+const cooldownTiroInvader = 3500;
+const cooldownInvader = 5000;
 let podeAtirar = true;
 let podeCriarInvader = true;
+let listaInvaders = []
+let listaCoracoes = []
+
 
 document.addEventListener('keydown', (e) => {
     keys[e.key.toLowerCase()] = true;
-    if (e.code === 'Space') tiro();
+    if (e.code === 'Space') atirar(nave);
 });
 
 document.addEventListener('keyup', (e) => {
@@ -34,8 +46,8 @@ function move() {
     if (keys['w']) naveY -= step;
     if (keys['s']) naveY += step;
 
-    naveX = Math.max(5, Math.min(95, naveX));
-    naveY = Math.max(40, Math.min(90, naveY));
+    naveX = Math.max(minXPlayer, Math.min(maxXPlayer, naveX));
+    naveY = Math.max(minYPlayer, Math.min(maxYPlayer, naveY));
 
     nave.style.left = `${naveX}%`;
     nave.style.top = `${naveY}%`;
@@ -44,102 +56,76 @@ function move() {
 }
 move();
 
-const tiro = () => {
-    if (!podeAtirar) return;
-    podeAtirar = false;
+function atirar(shooter) {
+    const isPlayerShooter = shooter === nave;
+    if (isPlayerShooter && !podeAtirar) return;
 
     const bala = document.createElement('div');
     bala.classList.add('bala');
-    bala.style.left = `${naveX}%`;
-    bala.style.top = `${naveY - 6}%`;
-    tiroX = naveX
+    bala.style.left = `${shooter.style.left}`;
+    bala.style.top = `${shooter.style.top}`;
 
     campoDeBatalha.appendChild(bala);
-    moverTiro(bala);
 
-    setTimeout(() => {
-        podeAtirar = true;
-    }, cooldownTiro);
+    moverTiro(bala, isPlayerShooter);
+
+    if (isPlayerShooter) {
+        podeAtirar = false;
+        setTimeout(() => {
+            podeAtirar = true;
+        }, cooldownTiroPlayer);
+    }
 };
 
-function moverTiro(bala) {
-    let posY = parseFloat(bala.style.top);
+function moverTiro(bala, isPlayerShooter) {
 
-    let atingiu = false;
-    
+    let balaY = parseFloat(bala.style.top);
+    let jogadorAtirando = isPlayerShooter
+
     const intervalo = setInterval(() => {
-        
+        if (jogadorAtirando) {
+            balaY -= 1;
+
             listaInvaders.forEach((invader, i) => {
                 if (colidiu(invader, bala)) {
                     listaInvaders.splice(i, 1)
                     invader.remove();
                     bala.remove();
-                    return
+                    clearInterval(intervalo);
                 }
             })
-        posY -= 1;
-        bala.style.top = `${posY}%`;
-        tiroY = bala.style.top
+        }
+        else {
 
-        if (posY <= 0) {
+            balaY += 1;
+
+            if (colidiu(nave, bala)) {
+                bala.remove();
+                listaCoracoes.pop().remove()
+                clearInterval(intervalo)
+                if (listaCoracoes.length <= 0) {
+                    //Configurar o game over   <<<<<<<<<<<<<<<<<<<<<
+                    return
+                }
+            }
+        }
+        if (balaY <= 0 || balaY >= 98) {
             bala.remove();
             clearInterval(intervalo);
         }
+
+        bala.style.top = `${balaY}%`;
+
     }, 10);
 }
 
-function moverInvader(invader) {
-    let direcao = mudarDirecaoInvader();
-    let posX = parseFloat(invader.style.left);
-    let posY = parseFloat(invader.style.top);
-
-    const intervalo = setInterval(() => {
-        if (Math.random() >= 0.9) direcao = mudarDirecaoInvader();
-
-        if (posX >= maxX && direcao === 0) {
-            direcao = mudarDirecaoInvader();
-            return
-        }
-        if (posY >= maxY && direcao === 1) {
-            direcao = mudarDirecaoInvader();
-            return
-        }
-        if (posX <= minX && direcao === 2) {
-            direcao = mudarDirecaoInvader();
-            return
-        }
-        if (posY <= minY && direcao === 3) {
-            direcao = mudarDirecaoInvader();
-            return
-        }
-
-        if (direcao === 0) posX += 0.4;
-        else if (direcao === 1) posY += 0.4;
-        else if (direcao === 2) posX -= 0.4;
-        else if (direcao === 3) posY -= 0.4;
-
-        invader.style.left = `${posX}%`;
-        invader.style.top = `${posY}%`;
-
-        if (posY > 100 || posX > 100 || posX < -5) {
-            invader.remove();
-            clearInterval(intervalo);
-        }
-    }, 50);
-}
-
-function mudarDirecaoInvader() {
-    const direcao = Math.floor(Math.random() * 4);
-    return direcao;
-
-}
 
 function gerarInvader() {
     if (!podeCriarInvader) return;
     podeCriarInvader = false;
 
-    const posX = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
-    const posY = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
+    const posX = Math.floor(Math.random() * (maxXInvader - minXInvader)) + minXInvader;
+    const posY = Math.floor(Math.random() * (maxYInvader - minYInvader)) + minYInvader;
 
     const invader = document.createElement('img');
     invader.classList.add('invader');
@@ -151,6 +137,10 @@ function gerarInvader() {
     campoDeBatalha.appendChild(invader);
     moverInvader(invader);
 
+    const intervalo = setInterval(() => {
+        atirar(invader);
+    }, cooldownTiroInvader);
+
     setTimeout(() => {
         podeCriarInvader = true;
         gerarInvader();
@@ -158,23 +148,76 @@ function gerarInvader() {
 }
 gerarInvader();
 
-function colidiu(invader, bala) {
-    let invaderX = parseFloat(invader.style.left)
-    let invaderY = parseFloat(invader.style.top)
+function moverInvader(invader) {
+    let direcao = mudarDirecaoInvader();
+    let posX = parseFloat(invader.style.left);
+    let posY = parseFloat(invader.style.top);
+
+    const intervalo = setInterval(() => {
+        if (Math.random() <= moveRandomRate) direcao = mudarDirecaoInvader();
+
+        //da pra esquematizar com o encapsulamento 
+
+        if (posY <= minYInvader && direcao === "up") {
+            direcao = mudarDirecaoInvader();
+            return
+        }
+        if (posY >= maxYInvader && direcao === "down") {
+            direcao = mudarDirecaoInvader();
+            return
+        }
+        if (posX <= minXInvader && direcao === "left") {
+            direcao = mudarDirecaoInvader();
+            return
+        }
+        if (posX >= maxXInvader && direcao === "right") {
+            direcao = mudarDirecaoInvader();
+            return
+        }
+
+        if (direcao === "up") posY -= step;
+        else if (direcao === "down") posY += step;
+        else if (direcao === "left") posX -= step;
+        else if (direcao === "right") posX += step;
+
+        invader.style.left = `${posX}%`;
+        invader.style.top = `${posY}%`;
+
+    }, 50);
+    atirar(invader);
+}
+
+
+function mudarDirecaoInvader() {
+    const direcao = ["up", "down", "left", "right"]
+    let escolha = Math.floor(Math.random() * 4);
+    return direcao[escolha];
+
+}
+
+function colidiu(alvo, bala) {
+    let alvoX = parseFloat(alvo.style.left)
+    let alvoY = parseFloat(alvo.style.top)
     let balaX = parseFloat(bala.style.left)
     let balaY = parseFloat(bala.style.top)
 
-    let invaderRadius = 2.5
-    let areaColisaoInvaderX = []
-    let areaColisaoInvaderY = []
-    
-    areaColisaoInvaderX.push(invaderX - invaderRadius)
-    areaColisaoInvaderX.push(invaderX + invaderRadius)
-    areaColisaoInvaderY.push(invaderY - invaderRadius)
-    areaColisaoInvaderY.push(invaderY + invaderRadius)
+    let alvoRadius = 2.5
 
-    if (balaX >= areaColisaoInvaderX[0] && balaX <= areaColisaoInvaderX[1] && balaY >= areaColisaoInvaderY[0] && balaY <= areaColisaoInvaderY[1])
-        return true
-    else return false
+    return balaX >= alvoX - alvoRadius && balaX <= alvoX + alvoRadius &&
+        balaY >= alvoY - alvoRadius && balaY <= alvoY + alvoRadius
+};
 
+function renderLife() {
+
+    for (let i = 0; i < vidaInicial; i++) {
+
+        let coracao = document.createElement('img')
+        coracao.classList.add('coracao')
+        coracao.src = '../images/heartpoint.png'
+        coracao.style.top = `${97}%`;
+        coracao.style.left = `${3 + i * 4}%`;
+        listaCoracoes.push(coracao);
+        campoDeBatalha.appendChild(coracao);
+    }
 }
+renderLife()
