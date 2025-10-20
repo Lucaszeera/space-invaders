@@ -38,6 +38,13 @@
     position: absolute;
     transform: translate(-50%, -50%);
 }
+.boss{
+    width: 250px;
+    top: 30px;
+    left: 30px;
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
 
 .coracao {
     position: absolute;
@@ -45,20 +52,40 @@
     height: 30px;
     transform: translate(-50%, -50%);
 }
-
 .gameOver {
-    position: absolute;
+    position: relative;
     top: 50%;
     left: 50%;
-    width: 60%;
+    width: 100%;
     transform: translate(-50%, -50%);
-    font-size: 42px;
-    color: red;
+    font-size: 72px;
+    color: #ff0000;
     font-weight: bold;
-    text-shadow: 2px 2px 8px black;
+    text-shadow: 
+        0 0 10px #ff0000,
+        0 0 10px #ff0000,
+        0 0 15px #ff0000,
+        4px 4px 0px #000;
+    text-align: center;
+    letter-spacing: 8px;
+    font-family: 'Courier New', monospace;
 }
-.botaoReiniciar{
-    border-radius: 2;
-    background-color: cyan;
-    border: #222;
+
+.botaoReiniciar {
+    margin-top: 30px;
+    padding: 10px 30px;
+    font-size: 20px;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(180deg, #00ffffde 0%, #00aaaad8 100%);
+    color: black;
+    border: 3.5px solid #fff;
+    border-radius: 8px;
+    cursor: pointer;
+
+    letter-spacing: 2px;
+    box-shadow: 
+        0 0 10px #00ffff,
+        inset 0 -2px 8px rgba(0,0,0,0.3);
+    transition: all 0.2s;
 }

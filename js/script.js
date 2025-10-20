@@ -1,7 +1,7 @@
-const nave = document.querySelector('.nave');
+
 const campoDeBatalha = document.querySelector('.main');
 const coracao = document.querySelector('.coracao')
-const telaGameOver = document.querySelector('gameover')
+let elementoTelaGameOver;
 
 // da pra esquematizar com encapsulamento
 const minXInvader = 5;
@@ -26,7 +26,7 @@ const vidaInicial = 3;
 const step = 0.4;
 const keys = {}
 const cooldownTiroPlayer = 400;
-const cooldownTiroInvader = 3500;
+const cooldownTiroInvader = 200;
 const cooldownInvader = 5000;
 let podeAtirar = true;
 let podeCriarInvader = true;
@@ -43,6 +43,20 @@ document.addEventListener('keyup', (e) => {
     keys[e.key.toLowerCase()] = false;
 });
 
+function gerarNave() {
+    naveX = 50;
+    naveY = 80;
+    nave = document.createElement('img')
+    nave.classList.add('nave')
+    nave.src = "../images/ship.png"
+    nave.style.left = `${naveX}%`;
+    nave.style.top = `${naveY}%`;
+    campoDeBatalha.appendChild(nave)
+    nave = nave
+    move();
+}
+gerarNave();
+
 function move() {
     if (gameOver) return;
     if (keys['a']) naveX -= step;
@@ -58,7 +72,6 @@ function move() {
 
     requestAnimationFrame(move);
 }
-move();
 
 function atirar(shooter) {
     if (gameOver) return;
@@ -113,8 +126,8 @@ function moverTiro(bala, isPlayerShooter) {
                     for (let i = listaInvaders.length - 1; i >= 0; i--) {
                         gameOver = true;
                         bala.remove()
-                        fecharJogo()
                     }
+                    fecharJogo()
                     clearInterval(intervalo)
                     return
                 }
@@ -247,9 +260,20 @@ function renderLife() {
     }
 }
 renderLife()
+
 function reiniciarJogo() {
-    campoDeBatalha.removeChild(telaGameOver)
+    console.log("executado restart")
+    elementoTelaGameOver.remove()
+    elementoTelaGameOver = null
+
     gameOver = false
+    
+
+    gerarNave()
+    gerarInvader()
+    renderLife()
+    
+
 }
 
 function fecharJogo() {
@@ -263,9 +287,9 @@ function fecharJogo() {
     const telaGameOver = template.content.cloneNode(true);
 
     campoDeBatalha.appendChild(telaGameOver)
+    elementoTelaGameOver = campoDeBatalha.querySelector('.gameOver');
 
     const botaoReiniciar = campoDeBatalha.querySelector('.botaoReiniciar');
-    botaoReiniciar.addEventListener('click', '');
-
-
+    botaoReiniciar.addEventListener('click', reiniciarJogo);
 }
+
