@@ -2,19 +2,18 @@
 const campoDeBatalha = document.querySelector('.main');
 const coracao = document.querySelector('.coracao')
 let elementoTelaGameOver;
+let elementoTelaParabens;
 
 // da pra esquematizar com encapsulamento
-const minXInvader = 5;
-const minYInvader = 5;
-const maxXInvader = 95;
+const minXInvader = 15;
+const minYInvader = 10;
+const maxXInvader = 90;
 const maxYInvader = 35;
 
-const minXPlayer = 5;
+const minXPlayer = 10;
 const minYPlayer = 40;
-const maxXPlayer = 95;
-const maxYPlayer = 95;
-
-let estaVivo = true;
+const maxXPlayer = 90;
+const maxYPlayer = 90;
 
 let naveX = 50;
 let naveY = 80;
@@ -26,10 +25,14 @@ const vidaInicial = 3;
 const step = 0.4;
 const keys = {}
 const cooldownTiroPlayer = 400;
-const cooldownTiroInvader = 200;
+const cooldownTiroInvader = 2000;
 const cooldownInvader = 5000;
+let vidaBoss = 3
+let alvoRadius = 6
 let podeAtirar = true;
 let podeCriarInvader = true;
+let invadersPorWave = 3;
+let isBossAtivo = false;
 let listaInvaders = []
 let listaCoracoes = []
 
@@ -48,7 +51,7 @@ function gerarNave() {
     naveY = 80;
     nave = document.createElement('img')
     nave.classList.add('nave')
-    nave.src = "../images/ship.png"
+    nave.src = "../images/bolsonado dedo.png"
     nave.style.left = `${naveX}%`;
     nave.style.top = `${naveY}%`;
     campoDeBatalha.appendChild(nave)
@@ -108,9 +111,16 @@ function moverTiro(bala, isPlayerShooter) {
                 const invaderData = listaInvaders[i]
                 const invader = invaderData.objeto
                 if (colidiu(invader, bala)) {
+                    if (invadersPorWave == 1) {
+                        vidaBoss--;
+                        if (vidaBoss == 0) {
+                            congratulations();
+                        }
+                    }
                     destruirInvader(invaderData, i)
                     bala.remove();
                     clearInterval(intervalo);
+
                 }
             }
         }
@@ -144,8 +154,7 @@ function moverTiro(bala, isPlayerShooter) {
 }
 
 function gerarInvader() {
-    if (gameOver) return;
-    if (!podeCriarInvader) return;
+    if (gameOver || !podeCriarInvader || isBossAtivo) return;
     podeCriarInvader = false;
 
     const posX = Math.floor(Math.random() * (maxXInvader - minXInvader)) + minXInvader;
@@ -153,7 +162,7 @@ function gerarInvader() {
 
     const invader = document.createElement('img');
     invader.classList.add('invader');
-    invader.src = '../images/invader 1.png';
+    invader.src = '../images/xandinho.png';
     invader.style.left = `${posX}%`;
     invader.style.top = `${posY}%`;
     const invaderData = { objeto: invader, intervalos: [] };
@@ -161,11 +170,24 @@ function gerarInvader() {
 
     campoDeBatalha.appendChild(invader);
     moverInvader(invaderData);
-
-    setTimeout(() => {
-        podeCriarInvader = true;
-        gerarInvader();
-    }, cooldownInvader);
+    invadersPorWave--;
+    if (invadersPorWave > 1) {
+        setTimeout(() => {
+            podeCriarInvader = true;
+            gerarInvader();
+        }, cooldownInvader);
+    }
+    else if (invadersPorWave == 1) {
+        const invader = document.createElement('img');
+        invader.classList.add('boss');
+        invader.src = '../images/xande boss.png';
+        invader.style.left = `${posX}%`;
+        invader.style.top = `${posY}%`;
+        const invaderData = { objeto: invader, intervalos: [] };
+        listaInvaders.push(invaderData)
+        campoDeBatalha.appendChild(invader);
+        moverInvader(invaderData);
+    }
 }
 gerarInvader();
 
@@ -240,8 +262,6 @@ function colidiu(alvo, bala) {
     let balaX = parseFloat(bala.style.left)
     let balaY = parseFloat(bala.style.top)
 
-    let alvoRadius = 2.5
-
     return balaX >= alvoX - alvoRadius && balaX <= alvoX + alvoRadius &&
         balaY >= alvoY - alvoRadius && balaY <= alvoY + alvoRadius
 };
@@ -267,12 +287,12 @@ function reiniciarJogo() {
     elementoTelaGameOver = null
 
     gameOver = false
-    
+
 
     gerarNave()
     gerarInvader()
     renderLife()
-    
+
 
 }
 
@@ -291,5 +311,19 @@ function fecharJogo() {
 
     const botaoReiniciar = campoDeBatalha.querySelector('.botaoReiniciar');
     botaoReiniciar.addEventListener('click', reiniciarJogo);
+}
+
+function congratulations() {
+    nave.remove()
+
+    const template = document.getElementById('telaParabens');
+    const telaParabens = template.content.cloneNode(true);
+
+    campoDeBatalha.appendChild(telaParabens)
+    elementoTelaParabens = campoDeBatalha.querySelector('.parabens');
+
+    const botaoReiniciar = campoDeBatalha.querySelector('.botaoReiniciar');
+    botaoReiniciar.addEventListener('click', reiniciarJogo);
+
 }
 

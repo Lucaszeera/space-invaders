@@ -16,7 +16,7 @@
 }
 
 .nave {
-    width: 60px;
+    width: 150px;
     position: absolute;
     transform: translate(-50%, -50%);
 }
@@ -32,7 +32,7 @@
 }
 
 .invader {
-    width: 50px;
+    width: 100px;
     top: 30px;
     left: 30px;
     position: absolute;
@@ -52,6 +52,25 @@
     height: 30px;
     transform: translate(-50%, -50%);
 }
+.parabens{
+    position: relative;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    transform: translate(-50%, -50%);
+    font-size: 72px;
+    color: #fbff00;
+    font-weight: bold;
+    text-shadow: 
+        0 0 10px #c8ff00,
+        0 0 10px #84ca01,
+        0 0 15px #34b800,
+        4px 4px 0px #000;
+    text-align: center;
+    letter-spacing: 8px;
+    font-family: 'Courier New', monospace;
+}
+
 .gameOver {
     position: relative;
     top: 50%;
