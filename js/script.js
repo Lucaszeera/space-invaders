@@ -26,12 +26,12 @@ let vidaInicial = 3;
 let step = 0.4;
 let cooldownTiroPlayer = 400;
 let cooldownTiroInvader = 2000;
-let cooldownInvader = 5000;
+let cooldownInvader = 3000;
 let vidaBoss = 3
 let alvoRadius = 6
 let podeAtirar = true;
 let podeCriarInvader = true;
-let invadersaGerar = 2;
+let invadersaGerar = 4;
 let invadersVivos = 0;
 let isBossAtivo = false;
 let listaInvaders = []
@@ -323,7 +323,7 @@ function reiniciarJogo() {
     podeCriarInvader = true
     isBossAtivo = false
     gameOver = false
-    invadersaGerar = 2
+    invadersaGerar = 4
     gerarNave()
     gerarInvader()
     renderLife()
