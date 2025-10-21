@@ -1,6 +1,7 @@
 
 const campoDeBatalha = document.querySelector('.main');
 const coracao = document.querySelector('.coracao')
+const keys = {}
 let elementoTelaGameOver;
 let elementoTelaParabens;
 
@@ -19,19 +20,19 @@ let naveX = 50;
 let naveY = 80;
 
 let gameOver = false;
-const speed = 50;
-const moveRandomRate = 0.02;
-const vidaInicial = 3;
-const step = 0.4;
-const keys = {}
-const cooldownTiroPlayer = 400;
-const cooldownTiroInvader = 2000;
-const cooldownInvader = 5000;
+let speed = 50;
+let moveRandomRate = 0.02;
+let vidaInicial = 3;
+let step = 0.4;
+let cooldownTiroPlayer = 400;
+let cooldownTiroInvader = 2000;
+let cooldownInvader = 5000;
 let vidaBoss = 3
 let alvoRadius = 6
 let podeAtirar = true;
 let podeCriarInvader = true;
-let invadersPorWave = 3;
+let invadersaGerar = 2;
+let invadersVivos = 0;
 let isBossAtivo = false;
 let listaInvaders = []
 let listaCoracoes = []
@@ -47,6 +48,7 @@ document.addEventListener('keyup', (e) => {
 });
 
 function gerarNave() {
+     console.log("teste nave")
     naveX = 50;
     naveY = 80;
     nave = document.createElement('img')
@@ -111,13 +113,21 @@ function moverTiro(bala, isPlayerShooter) {
                 const invaderData = listaInvaders[i]
                 const invader = invaderData.objeto
                 if (colidiu(invader, bala)) {
-                    if (invadersPorWave == 1) {
+                    if (isBossAtivo) {
                         vidaBoss--;
+                        bala.remove()
+                        clearInterval(intervalo);
+                        
                         if (vidaBoss == 0) {
+                            console.log("ganhou!! vida do boss é 0")
+                            destruirInvader(invaderData, i)
                             congratulations();
+                            clearInterval(intervalo)
                         }
+                        return
                     }
                     destruirInvader(invaderData, i)
+                    console.log("teste")
                     bala.remove();
                     clearInterval(intervalo);
 
@@ -154,39 +164,59 @@ function moverTiro(bala, isPlayerShooter) {
 }
 
 function gerarInvader() {
+
     if (gameOver || !podeCriarInvader || isBossAtivo) return;
     podeCriarInvader = false;
 
     const posX = Math.floor(Math.random() * (maxXInvader - minXInvader)) + minXInvader;
     const posY = Math.floor(Math.random() * (maxYInvader - minYInvader)) + minYInvader;
 
-    const invader = document.createElement('img');
-    invader.classList.add('invader');
-    invader.src = '../images/xandinho.png';
-    invader.style.left = `${posX}%`;
-    invader.style.top = `${posY}%`;
-    const invaderData = { objeto: invader, intervalos: [] };
-    listaInvaders.push(invaderData)
-
-    campoDeBatalha.appendChild(invader);
-    moverInvader(invaderData);
-    invadersPorWave--;
-    if (invadersPorWave > 1) {
-        setTimeout(() => {
+    if (invadersaGerar == 1) {
+        console.log("teste invadersagerar == 1")
+        if(invadersVivos != 0){
+            setTimeout(() => {
             podeCriarInvader = true;
             gerarInvader();
+            return
         }, cooldownInvader);
-    }
-    else if (invadersPorWave == 1) {
+        }else{
         const invader = document.createElement('img');
         invader.classList.add('boss');
         invader.src = '../images/xande boss.png';
         invader.style.left = `${posX}%`;
         invader.style.top = `${posY}%`;
+        speed = speed / 3
+        alvoRadius += 4
+        cooldownTiroInvader = cooldownTiroInvader / 3
+
         const invaderData = { objeto: invader, intervalos: [] };
         listaInvaders.push(invaderData)
         campoDeBatalha.appendChild(invader);
+        isBossAtivo = true
+        invadersaGerar --;
+        invadersVivos ++;
+        console.log(invadersVivos, invadersaGerar)
+        moverInvader(invaderData);}
+    }
+    else if (invadersaGerar > 1) {
+         console.log("teste invadersagerar > 1")
+        const invader = document.createElement('img');
+        invader.classList.add('invader');
+        invader.src = '../images/xandinho.png';
+        invader.style.left = `${posX}%`;
+        invader.style.top = `${posY}%`;
+        const invaderData = { objeto: invader, intervalos: [] };
+        listaInvaders.push(invaderData)
+
+        campoDeBatalha.appendChild(invader);
+        invadersVivos ++;
+        invadersaGerar --;
         moverInvader(invaderData);
+
+        setTimeout(() => {
+            podeCriarInvader = true;
+            gerarInvader();
+        }, cooldownInvader);
     }
 }
 gerarInvader();
@@ -248,6 +278,7 @@ function destruirInvader(invaderData, index) {
 
     invader = invaderData.objeto
     invader.remove();
+    invadersVivos --;
     listaInvaders.splice(index, 1);
 
     if (invaderData.intervalos) {
@@ -286,13 +317,16 @@ function reiniciarJogo() {
     elementoTelaGameOver.remove()
     elementoTelaGameOver = null
 
+    cooldownTiroInvader = 2000;
+    alvoRadius = 6
+    speed = 50;
+    podeCriarInvader = true
+    isBossAtivo = false
     gameOver = false
-
-
+    invadersaGerar = 2
     gerarNave()
     gerarInvader()
     renderLife()
-
 
 }
 
