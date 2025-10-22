@@ -5,7 +5,6 @@ const keys = {}
 let elementoTelaGameOver;
 let elementoTelaParabens;
 
-// da pra esquematizar com encapsulamento
 const minXInvader = 15;
 const minYInvader = 10;
 const maxXInvader = 90;
@@ -26,12 +25,12 @@ let vidaInicial = 3;
 let step = 0.4;
 let cooldownTiroPlayer = 400;
 let cooldownTiroInvader = 2000;
-let cooldownInvader = 3000;
+let cooldownInvader = 4000;
 let vidaBoss = 3
 let alvoRadius = 6
 let podeAtirar = true;
 let podeCriarInvader = true;
-let invadersaGerar = 4;
+let invadersaGerar = 8;
 let invadersVivos = 0;
 let isBossAtivo = false;
 let listaInvaders = []
@@ -48,7 +47,6 @@ document.addEventListener('keyup', (e) => {
 });
 
 function gerarNave() {
-     console.log("teste nave")
     naveX = 50;
     naveY = 80;
     nave = document.createElement('img')
@@ -117,9 +115,8 @@ function moverTiro(bala, isPlayerShooter) {
                         vidaBoss--;
                         bala.remove()
                         clearInterval(intervalo);
-                        
+
                         if (vidaBoss == 0) {
-                            console.log("ganhou!! vida do boss é 0")
                             destruirInvader(invaderData, i)
                             congratulations();
                             clearInterval(intervalo)
@@ -127,7 +124,6 @@ function moverTiro(bala, isPlayerShooter) {
                         return
                     }
                     destruirInvader(invaderData, i)
-                    console.log("teste")
                     bala.remove();
                     clearInterval(intervalo);
 
@@ -172,34 +168,33 @@ function gerarInvader() {
     const posY = Math.floor(Math.random() * (maxYInvader - minYInvader)) + minYInvader;
 
     if (invadersaGerar == 1) {
-        console.log("teste invadersagerar == 1")
-        if(invadersVivos != 0){
-            setTimeout(() => {
-            podeCriarInvader = true;
-            gerarInvader();
-            return
-        }, cooldownInvader);
-        }else{
-        const invader = document.createElement('img');
-        invader.classList.add('boss');
-        invader.src = '../images/xande boss.png';
-        invader.style.left = `${posX}%`;
-        invader.style.top = `${posY}%`;
-        speed = speed / 3
-        alvoRadius += 4
-        cooldownTiroInvader = cooldownTiroInvader / 3
 
-        const invaderData = { objeto: invader, intervalos: [] };
-        listaInvaders.push(invaderData)
-        campoDeBatalha.appendChild(invader);
-        isBossAtivo = true
-        invadersaGerar --;
-        invadersVivos ++;
-        console.log(invadersVivos, invadersaGerar)
-        moverInvader(invaderData);}
+        if (invadersVivos != 0) {
+            setTimeout(() => {
+                podeCriarInvader = true;
+                gerarInvader();
+                return
+            }, cooldownInvader);
+        } else {
+            const invader = document.createElement('img');
+            invader.classList.add('boss');
+            invader.src = '../images/Xandao boss.png';
+            invader.style.left = `${posX}%`;
+            invader.style.top = `${posY}%`;
+            speed = speed / 3
+            alvoRadius += 6
+            cooldownTiroInvader = cooldownTiroInvader / 2
+
+            const invaderData = { objeto: invader, intervalos: [] };
+            listaInvaders.push(invaderData)
+            campoDeBatalha.appendChild(invader);
+            isBossAtivo = true
+            invadersaGerar--;
+            invadersVivos++;
+            moverInvader(invaderData);
+        }
     }
     else if (invadersaGerar > 1) {
-         console.log("teste invadersagerar > 1")
         const invader = document.createElement('img');
         invader.classList.add('invader');
         invader.src = '../images/xandinho.png';
@@ -209,8 +204,10 @@ function gerarInvader() {
         listaInvaders.push(invaderData)
 
         campoDeBatalha.appendChild(invader);
-        invadersVivos ++;
-        invadersaGerar --;
+        invadersVivos++;
+        invadersaGerar--;
+        cooldownInvader -= 600;
+        cooldownTiroInvader -= 150
         moverInvader(invaderData);
 
         setTimeout(() => {
@@ -230,8 +227,6 @@ function moverInvader(invaderData) {
 
     const intervaloMovimento = setInterval(() => {
         if (Math.random() <= moveRandomRate) direcao = mudarDirecaoInvader();
-
-        //da pra esquematizar com o encapsulamento 
 
         if (posY <= minYInvader && direcao === "up") {
             direcao = mudarDirecaoInvader();
@@ -264,7 +259,6 @@ function moverInvader(invaderData) {
         atirar(invader);
     }, cooldownTiroInvader);
     invaderData.intervalos.push(intervaloMovimento, intervaloTiro);
-    console.log(invaderData)
 }
 
 function mudarDirecaoInvader() {
@@ -278,7 +272,7 @@ function destruirInvader(invaderData, index) {
 
     invader = invaderData.objeto
     invader.remove();
-    invadersVivos --;
+    invadersVivos--;
     listaInvaders.splice(index, 1);
 
     if (invaderData.intervalos) {
@@ -313,21 +307,21 @@ function renderLife() {
 renderLife()
 
 function reiniciarJogo() {
-    console.log("executado restart")
     elementoTelaGameOver.remove()
     elementoTelaGameOver = null
 
+    cooldownInvader = 4000;
     cooldownTiroInvader = 2000;
     alvoRadius = 6
     speed = 50;
     podeCriarInvader = true
     isBossAtivo = false
     gameOver = false
-    invadersaGerar = 4
+    invadersaGerar = 8
+    vidaBoss = 3
     gerarNave()
     gerarInvader()
     renderLife()
-
 }
 
 function fecharJogo() {
@@ -353,11 +347,25 @@ function congratulations() {
     const template = document.getElementById('telaParabens');
     const telaParabens = template.content.cloneNode(true);
 
-    campoDeBatalha.appendChild(telaParabens)
-    elementoTelaParabens = campoDeBatalha.querySelector('.parabens');
 
-    const botaoReiniciar = campoDeBatalha.querySelector('.botaoReiniciar');
+    const botaoReiniciar = telaParabens.querySelector('.botaoReiniciar');
     botaoReiniciar.addEventListener('click', reiniciarJogo);
 
+    campoDeBatalha.appendChild(telaParabens)
+    elementoTelaParabens = campoDeBatalha.querySelector('.parabens');
 }
 
+function congratulations() {
+    nave.remove()
+
+    const template = document.getElementById('telaParabens');
+    const telaParabens = template.content.cloneNode(true);
+
+    const botaoReiniciar = telaParabens.querySelector('.botaoReiniciar');
+    if (botaoReiniciar) {
+        botaoReiniciar.addEventListener('click', reiniciarJogo);
+    }
+
+    campoDeBatalha.appendChild(telaParabens);
+    elementoTelaParabens = campoDeBatalha.querySelector('.parabens');
+}
