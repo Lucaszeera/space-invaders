@@ -6,33 +6,58 @@
 
 .main {
     background-color: #222;
-    min-height: 400px;
+    position: relative;
     height: 100vh;
+    min-height: 400px;
     min-width: 500px;
     max-width: 1000px;
     border: 1px solid black;
     margin: 0 auto;
+}
+
+.tutorialConteudo {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    justify-items: center;
+}
+.tutorialConteudo p{ 
+    font-size: 26px;
+    color: #c9c9c9;
+    font-weight: bold;
+    text-shadow:
+        0 0 10px #00ccff,
+        0 0 10px #01acca,
+        2px 2px 2px #010053;
+    letter-spacing: 8px;
+    font-family: 'Courier New', monospace;
+    margin: 0;
+    text-align: center;
+}
+.tutorialImagem{
+    width: 60%;
+    left: 20%;
     position: relative;
 }
 
 .nave {
-    width: 150px;
+    width: 80px;
     position: absolute;
     transform: translate(-50%, -50%);
 }
 
 .bala {
     background-color: yellow;
+    width: 4px;
+    height: 16px;
     border-radius: 5px;
     box-shadow: 0px 0px 0px 1px green;
     position: absolute;
-    width: 4px;
-    height: 16px;
     transform: translateX(-50%);
 }
 
 .invader {
-    width: 100px;
+    width: 60px;
     top: 30px;
     left: 30px;
     position: absolute;
@@ -40,7 +65,7 @@
 }
 
 .boss {
-    width: 250px;
+    width: 200px;
     top: 30px;
     left: 30px;
     position: absolute;
@@ -65,7 +90,7 @@
     position: absolute;
     width: 100%;
     height: 100%;
-    background-image: url('../images/bolsoxande.jpg');
+    background-image: url('../images/Stairs_to_Heaven.png');
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
@@ -74,14 +99,15 @@
 
 .parabens-conteudo {
     position: relative;
-    top: 78%;
+    top: 30%;
     transform: translate(-50%, -50%);
     z-index: 2;
     text-align: center;
     opacity: 0;
     animation: fadeIn 2s ease-in 1s forwards;
 }
-.parabensJoinha{
+
+.parabensJoinha {
     position: relative;
     width: 40%;
     bottom: 100px;
@@ -89,14 +115,14 @@
     animation: fadeIn 3s ease-in 3s forwards;
 }
 
-.parabens-conteudo h1 {
+.parabens-conteudo p {
     font-size: 32px;
-    color: #f7fc00;
+    color: #0063c0;
     font-weight: bold;
     text-shadow:
-        0 0 10px #00ff22,
-        0 0 10px #7dca01,
-        0 0 15px #00b828,
+        0 0 10px #00ccff,
+        0 0 10px #01acca,
+        0 0 15px #007eb8,
         2px 2px 2px #010053;
     letter-spacing: 8px;
     font-family: 'Courier New', monospace;
@@ -122,7 +148,7 @@
     left: 50%;
     width: 100%;
     transform: translate(-50%, -50%);
-    font-size: 72px;
+    font-size: 150px;
     color: #e00100;
     font-weight: bold;
     text-shadow:
@@ -135,7 +161,7 @@
     font-family: 'Courier New', monospace;
 }
 
-.botaoReiniciar {
+.botao {
     margin-top: 30px;
     padding: 10px 30px;
     font-size: 20px;
